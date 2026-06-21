@@ -1,0 +1,24 @@
+server:
+
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: veranum-api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: veranum-usuarios
+          uri: ${USUARIO_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/v1/usuarios/**
+
+        - id: veranum-reservas
+          uri: ${RESERVA_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/v1/reservas/**
+
+        - id: veranum-habitaciones
+          uri: ${RESERVA_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/v1/habitaciones/**

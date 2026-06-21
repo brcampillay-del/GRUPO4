@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+
+  # BASE DE DATOS 1: USUARIOS
+
+  mysql-usuario:
+    image: mysql:8.0
+    container_name: mysql-usuario
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: db_veranum_usuarios
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: veranum_user
+      MYSQL_PASSWORD: veranum_pass
+    volumes:
+      - mysql_usuario_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+
+  # BASE DE DATOS 2: RESERVAS
+
+  mysql-reserva:
+    image: mysql:8.0
+    container_name: mysql-reserva
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: db_veranum_reservas_habitaciones
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: veranum_user
+      MYSQL_PASSWORD: veranum_pass
+    volumes:
+      - mysql_reserva_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+
+  # MICROSERVICIO 1: USUARIOS
+
+  veranum-coreusuario:
+    build:
+      context: ./veranum_coreusuario_final_eva
+      dockerfile: Dockerfile
+    container_name: veranum-coreusuario
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      PORT: 8081
+      DB_URL: "jdbc:mysql://mysql-usuario:3306/db_veranum_usuarios?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=America/Santiago&allowPublicKeyRetrieval=true"
+      DB_USERNAME: veranum_user
+      DB_PASSWORD: veranum_pass
+    depends_on:
+      mysql-usuario:
+        condition: service_healthy
+
+
+  # MICROSERVICIO 2: RESERVAS
+
+  veranum-corereserva:
+    build:
+      context: ./veranum_corereserva_final_eva
+      dockerfile: Dockerfile
+    container_name: veranum-corereserva
+    restart: always
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      PORT: 8082
+      DB_URL: "jdbc:mysql://mysql-reserva:3306/db_veranum_reservas_habitaciones?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=America/Santiago&allowPublicKeyRetrieval=true"
+      DB_USERNAME: veranum_user
+      DB_PASSWORD: veranum_pass
+      USUARIO_API_URL: http://veranum-coreusuario:8081/api/v1/usuarios
+    depends_on:
+      mysql-reserva:
+        condition: service_healthy
+      veranum-coreusuario:
+        condition: service_started
+
+
+  # MICROSERVICIO 3: API GATEWAY
+
+  veranum-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: veranum-gateway
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+      USUARIO_SERVICE_URL: http://veranum-coreusuario:8081
+      RESERVA_SERVICE_URL: http://veranum-corereserva:8082
+    depends_on:
+      - veranum-coreusuario
+      - veranum-corereserva
+
+volumes:
+  mysql_usuario_data:
+  mysql_reserva_data:
