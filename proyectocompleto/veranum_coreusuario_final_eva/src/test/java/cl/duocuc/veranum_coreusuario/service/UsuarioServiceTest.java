@@ -172,4 +172,20 @@ void obtenerTodos_Exito() {
     assertFalse(resultados.isEmpty());
     assertEquals(1, resultados.size());
 }
+@Test
+@DisplayName("Debe lanzar la Exepcion si el rol indicado no existe ")
+void crearUsuario_RolNoExistente_LanzaException(){
+    when(usuarioRepository.findByRut(requestValido.getRut())).thenReturn(Optional.empty());
+    when(usuarioRepository.findByEmail(requestValido.getEmail())).thenReturn(Optional.empty());
+    when(rolRepository.findById(requestValido.getRolId())).thenReturn(Optional.empty());
+
+
+    RuntimeException excepcion = assertThrows(RuntimeException.class, () -> {
+        usuarioService.crearUsuario(requestValido);
+    });
+
+    assertEquals("El Rol especificado no existe.", excepcion.getMessage());
+    verify(usuarioRepository, never()).save(any(Usuario.class));
+}
+
 }
