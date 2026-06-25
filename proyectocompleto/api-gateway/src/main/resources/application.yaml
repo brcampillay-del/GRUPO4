@@ -22,3 +22,5 @@ spring:
           uri: ${RESERVA_SERVICE_URL:http://localhost:8082}
           predicates:
             - Path=/api/v1/habitaciones/**
+            - server:
+                port: 8080
