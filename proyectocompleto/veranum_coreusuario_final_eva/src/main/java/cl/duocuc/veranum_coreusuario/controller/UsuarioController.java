@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 
@@ -24,6 +23,9 @@ import java.util.List;
 public class UsuarioController{
 
 private final UsuarioService usuarioService;
+
+
+
 
 @Operation(summary = "Registrar un nuevo usuario", description = "Crea un usuario validando que el RUT y el correo electrónico no estén duplicados en el sistema.")
 @ApiResponses(value = {
@@ -39,6 +41,9 @@ public ResponseEntity<ApiResponse<Usuario>> crearUsuario(@Valid @RequestBody Usu
     }
 
 @Operation(summary = "Listar todos los usuarios", description = "Obtiene una lista completa de todos los usuarios registrados.")
+@ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Lista obtenida correctamente")
+})
 @GetMapping
 public ResponseEntity<ApiResponse<List<Usuario>>> obtenerTodos() {
     return ResponseEntity.ok(new ApiResponse<>("Lista de usuarios", usuarioService.obtenerTodos()));
@@ -55,12 +60,19 @@ public ResponseEntity<ApiResponse<Usuario>> obtenerPorId(@PathVariable Long id) 
     }
 
 @Operation(summary = "Bloquear usuario", description = "Cambia el estado de un usuario a BLOQUEADO por motivos de seguridad o administración.")
+@ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Usuario bloqueado exitosamente"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "El usuario no existe")
+})
 @PutMapping("/{id}/bloquear")
 public ResponseEntity<ApiResponse<Usuario>> bloquearUsuario(@PathVariable Long id) {
     return ResponseEntity.ok(new ApiResponse<>("Usuario bloqueado", usuarioService.bloquearUsuario(id)));
     }
 
 @Operation(summary = "Verificar existencia por RUT", description = "Consulta interna para validar si un RUT ya está registrado en la base de datos.")
+@ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Consulta realizada correctamente (Devuelve true o false)")
+})
 @GetMapping("/existe/{rut}")
 public boolean verificarSiExisteRut(@PathVariable String rut) {
     return usuarioService.existePorRut(rut);
@@ -68,6 +80,11 @@ public boolean verificarSiExisteRut(@PathVariable String rut) {
 
 
 @Operation(summary = "Actualizar usuario", description = "Modifica los datos de un usuario existente.")
+@ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Usuario actualizado con éxito"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos enviados en la petición"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "El usuario no existe")
+})
 @PutMapping("/{id}")
 public ResponseEntity<ApiResponse<Usuario>> actualizarUsuario(
 @PathVariable Long id,
@@ -77,6 +94,10 @@ public ResponseEntity<ApiResponse<Usuario>> actualizarUsuario(
 }
 
 @Operation(summary = "Eliminar usuario", description = "Elimina permanentemente a un usuario del sistema.")
+@ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description ="Usuario eliminado con éxito"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description ="El usuario no existe")
+})
 @DeleteMapping("/{id}")
 public ResponseEntity<ApiResponse<Void>> eliminarUsuario(@PathVariable Long id) {
   usuarioService.eliminarUsuario(id);
