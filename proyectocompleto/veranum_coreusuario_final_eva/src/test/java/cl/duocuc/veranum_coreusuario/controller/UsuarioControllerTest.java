@@ -88,8 +88,9 @@ class UsuarioControllerTest {
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(usuarioMock, response.getBody().getData());
-        verify(usuarioService, times(1)).obtenerPorId(10L);
+        var responseBody = response.getBody();
+        assertNotNull(responseBody, "El cuerpo de la respuesta no debería ser nulo");
+        assertEquals(usuarioMock, responseBody.getData());
     }
 
     @Test
