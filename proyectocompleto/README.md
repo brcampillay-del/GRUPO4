@@ -46,18 +46,21 @@ El API Gateway funciona como el punto de entrada principal para las peticiones e
 
 ## APIs y Endpoints Disponibles
 
-### API Gestión de Usuarios (/api/v1/usuarios)
-* POST /api/v1/usuarios - Registrar un nuevo usuario.
-* GET /api/v1/usuarios/{id} - Buscar un usuario específico por su ID.
-* PUT /api/v1/usuarios/{id} - Actualizar los datos de un usuario.
-* DELETE /api/v1/usuarios/{id} - Eliminar un usuario del sistema.
-* PUT /api/v1/usuarios/{id}/bloquear - Cambiar el estado de bloqueo de un usuario.
+### API Gestión de Usuarios (`/api/v1/usuarios`)
+* `POST /api/v1/usuarios` - Registrar un nuevo usuario.
+* `GET /api/v1/usuarios` - Listar todos los usuarios registrados en el sistema.
+* `GET /api/v1/usuarios/{id}` - Buscar un usuario específico por su ID.
+* `GET /api/v1/usuarios/existe/{rut}` - Validar la existencia de un usuario mediante su RUT (Endpoint de comunicación interna).
+* `PUT /api/v1/usuarios/{id}` - Actualizar los datos de un usuario.
+* `DELETE /api/v1/usuarios/{id}` - Eliminar un usuario del sistema.
+* `PUT /api/v1/usuarios/{id}/bloquear` - Cambiar el estado de bloqueo de un usuario.
 
-### API Gestión de Reservas (/api/v1/reservas)
-* POST /api/v1/reservas - Crear una nueva reserva (Valida internamente la existencia del usuario).
-* GET /api/v1/reservas - Listar todas las reservas registradas.
-* GET /api/v1/reservas/{id} - Obtener el detalle de una reserva específica.
-* PUT /api/v1/reservas/{id}/cancelar - Cancelar una reserva y liberar la habitación.
+### API Gestión de Reservas (`/api/v1/reservas`)
+* `POST /api/v1/reservas` - Crear una nueva reserva (Valida internamente la existencia del usuario).
+* `GET /api/v1/reservas` - Listar todas las reservas registradas.
+* `GET /api/v1/reservas/{id}` - Obtener el detalle de una reserva específica.
+* `GET /api/v1/reservas/usuario/{rut}` - Obtener el historial de reservas asociado a un usuario específico mediante su RUT.
+* `PUT /api/v1/reservas/{id}/cancelar` - Cancelar una reserva y liberar la habitación.
 
 ---
 

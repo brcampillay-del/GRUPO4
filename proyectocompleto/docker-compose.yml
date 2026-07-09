@@ -100,7 +100,7 @@ services:
     container_name: veranum-gateway
     restart: always
     ports:
-      - "8080:8080"
+      - "9090:8080"
     environment:
       PORT: 8080
       USUARIO_SERVICE_URL: http://veranum-coreusuario:8081
