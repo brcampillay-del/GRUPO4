@@ -115,18 +115,22 @@ void bloquearUsuario_YaBloqueado_LanzaExcepcion() {
 
 @Test
 @DisplayName("Debe devolver true si el RUT existe en el sistema")
-void existePorRut_Existe_RetornaTrue() {
-    when(usuarioRepository.findByRut("19123456-7")).thenReturn(Optional.of(usuarioExistente));
-    boolean existe = usuarioService.existePorRut("19123456-7");
-    assertTrue(existe);
+ void existePorRut_Existe_RetornaTrue() {
+        when(usuarioRepository.findByRut("19123456-7")).thenReturn(Optional.of(usuarioExistente));
+        boolean existe = usuarioService.existePorRut("19123456-7");
+        assertTrue(existe);
+        verify(usuarioRepository, times(1))
+                .findByRut("19123456-7");
 }
 
-@Test
-@DisplayName("Debe devolver false si el RUT no existe en el sistema")
-void existePorRut_NoExiste_RetornaFalse() {
-    when(usuarioRepository.findByRut("99999999-9")).thenReturn(Optional.empty());
-    boolean existe = usuarioService.existePorRut("99999999-9");
-    assertFalse(existe);
+ @Test
+ @DisplayName("Debe devolver false si el RUT no existe en el sistema")
+    void existePorRut_NoExiste_RetornaFalse() {
+        when(usuarioRepository.findByRut("99999999-9")).thenReturn(Optional.empty());
+        boolean existe = usuarioService.existePorRut("99999999-9");
+        assertFalse(existe);
+        verify(usuarioRepository, times(1))
+                .findByRut("99999999-9");
 }
 
 @Test
