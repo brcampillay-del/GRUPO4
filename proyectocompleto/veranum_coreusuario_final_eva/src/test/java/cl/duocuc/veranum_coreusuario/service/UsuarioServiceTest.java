@@ -172,20 +172,94 @@ void obtenerTodos_Exito() {
     assertFalse(resultados.isEmpty());
     assertEquals(1, resultados.size());
 }
-@Test
-@DisplayName("Debe lanzar la Exepcion si el rol indicado no existe ")
-void crearUsuario_RolNoExistente_LanzaException(){
-    when(usuarioRepository.findByRut(requestValido.getRut())).thenReturn(Optional.empty());
-    when(usuarioRepository.findByEmail(requestValido.getEmail())).thenReturn(Optional.empty());
-    when(rolRepository.findById(requestValido.getRolId())).thenReturn(Optional.empty());
 
 
-    RuntimeException excepcion = assertThrows(RuntimeException.class, () -> {
-        usuarioService.crearUsuario(requestValido);
-    });
+    @Test
+    @DisplayName("Debe lanzar excepción si el request para crear usuario es nulo (Línea 26)")
+    void crearUsuario_RequestNull_LanzaExcepcion() {
+        IllegalArgumentException excepcion = assertThrows(IllegalArgumentException.class, () -> {
+            usuarioService.crearUsuario(null);
+        });
+        assertEquals("La solicitud de registro no puede estar vacía.", excepcion.getMessage());
+    }
 
-    assertEquals("El Rol especificado no existe.", excepcion.getMessage());
-    verify(usuarioRepository, never()).save(any(Usuario.class));
-}
+    @Test
+    @DisplayName("Debe lanzar excepción si el rol no existe al crear (Línea 45)")
+    void crearUsuario_RolNoExiste_LanzaExcepcion() {
+        when(usuarioRepository.findByRut(requestValido.getRut())).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmail(requestValido.getEmail())).thenReturn(Optional.empty());
+        when(rolRepository.findById(requestValido.getRolId())).thenReturn(Optional.empty());
 
+        RuntimeException excepcion = assertThrows(RuntimeException.class, () -> {
+            usuarioService.crearUsuario(requestValido);
+        });
+        assertEquals("El Rol especificado no existe.", excepcion.getMessage());
+    }
+
+    @Test
+    @DisplayName("Debe capturar excepción del bloque catch al crear usuario (Línea 63)")
+    void crearUsuario_ErrorInterno_LanzaExcepcion() {
+        when(usuarioRepository.findByRut(requestValido.getRut())).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmail(requestValido.getEmail())).thenReturn(Optional.empty());
+        when(rolRepository.findById(requestValido.getRolId())).thenReturn(Optional.of(rolCliente));
+
+        when(usuarioRepository.save(any(Usuario.class))).thenThrow(new RuntimeException("Falla de BD"));
+
+        RuntimeException excepcion = assertThrows(RuntimeException.class, () -> {
+            usuarioService.crearUsuario(requestValido);
+        });
+        assertEquals("Ocurrió un error interno al intentar registrar el usuario en la base de datos.", excepcion.getMessage());
+    }
+
+    @Test
+    @DisplayName("Debe retornar lista vacía y no caerse si no hay usuarios (Línea 71)")
+    void obtenerTodos_ListaVacia_RetornaVacio() {
+        when(usuarioRepository.findAll()).thenReturn(List.of());
+
+        List<Usuario> resultados = usuarioService.obtenerTodos();
+
+        assertTrue(resultados.isEmpty());
+        verify(usuarioRepository, times(1)).findAll();
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción si se busca un ID de usuario que no existe (Línea 78)")
+    void obtenerPorId_NoExiste_LanzaExcepcion() {
+        when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
+
+        RuntimeException excepcion = assertThrows(RuntimeException.class, () -> {
+            usuarioService.obtenerPorId(99L);
+        });
+        assertEquals("Usuario no encontrado con ID: 99", excepcion.getMessage());
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción si al actualizar, el Email pertenece a otro usuario (Línea 131)")
+    void actualizarUsuario_ConflictoEmail_LanzaExcepcion() {
+        Usuario otroUsuario = new Usuario();
+        otroUsuario.setId(99L); // ID distinto al 10L
+
+        when(usuarioRepository.findById(10L)).thenReturn(Optional.of(usuarioExistente));
+        when(usuarioRepository.findByRut(requestValido.getRut())).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmail(requestValido.getEmail())).thenReturn(Optional.of(otroUsuario));
+
+        IllegalStateException excepcion = assertThrows(IllegalStateException.class, () -> {
+            usuarioService.actualizarUsuario(10L, requestValido);
+        });
+        assertEquals("Conflicto: El correo ya está en uso por otro usuario.", excepcion.getMessage());
+    }
+
+    @Test
+    @DisplayName("Debe lanzar EntityNotFoundException si el rol no existe al actualizar (Línea 137)")
+    void actualizarUsuario_RolNoExiste_LanzaExcepcion() {
+        when(usuarioRepository.findById(10L)).thenReturn(Optional.of(usuarioExistente));
+        when(usuarioRepository.findByRut(requestValido.getRut())).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmail(requestValido.getEmail())).thenReturn(Optional.empty());
+        when(rolRepository.findById(requestValido.getRolId())).thenReturn(Optional.empty());
+
+        Exception excepcion = assertThrows(Exception.class, () -> {
+            usuarioService.actualizarUsuario(10L, requestValido);
+        });
+        assertEquals("El Rol especificado no existe.", excepcion.getMessage());
+    }
 }
