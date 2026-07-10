@@ -49,11 +49,13 @@ public ResponseEntity<ApiResponse<List<Usuario>>> obtenerTodos() {
     return ResponseEntity.ok(new ApiResponse<>("Lista de usuarios", usuarioService.obtenerTodos()));
     }
 
+
+//modificacion examen
 @Operation(summary = "Buscar usuario", description = "Devuelve los detalles de un usuario específico buscado por su identificador.")
 @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Usuario encontrado"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "El usuario no existe")
-})
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",description = "Recurso encontrado correctamente"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",description = "Recurso no encontrado")
+    })
 @GetMapping("/{id}")
 public ResponseEntity<ApiResponse<Usuario>> obtenerPorId(@PathVariable Long id) {
     return ResponseEntity.ok(new ApiResponse<>("Detalle del usuario", usuarioService.obtenerPorId(id)));
